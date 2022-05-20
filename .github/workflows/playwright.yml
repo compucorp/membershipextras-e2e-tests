@@ -1,0 +1,96 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    container: compucorp/civicrm-buildkit:1.1.1-php7.2
+
+    env:
+
+      CIVICRM_EXTENSIONS_DIR: site/web/sites/all/modules/civicrm/tools/extensions
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+
+      - name: Config mysql database as per CiviCRM requirement
+        run: echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" | mysql -u root --password=root --host=mysql
+
+      - name: Config amp
+        run : amp config:set --mysql_dsn=mysql://root:root@mysql:3306
+
+      - name: Build Drupal site
+        run: civibuild create drupal-clean --civi-ver 5.39.1 --cms-ver 7.78 --web-root $GITHUB_WORKSPACE/site --admin-pass admin
+
+      - uses: compucorp/apply-patch@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo: compucorp/civicrm-core
+          version: 5.39.1
+          path: site/web/sites/all/modules/civicrm
+
+      - name: Installing ME suite extensions and Configure Shoreditch theme
+        working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}
+        run: |
+          drush en -y node_export
+          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.membershipextras.git
+          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.manualdirectdebit.git
+          cv en uk.co.compucorp.membershipextras uk.co.compucorp.manualdirectdebit
+          git clone --depth 1 https://github.com/civicrm/org.civicrm.module.cividiscount.git --branch 3.8.3
+          cv en org.civicrm.module.cividiscount
+          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.membershipextrasdefaultconfig.git
+          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.data.membershipextrasdata.git
+          git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git --branch 1.0.0-beta.11
+          cv en uk.co.compucorp.membershipextrasdefaultconfig uk.co.compucorp.data.membershipextrasdata org.civicrm.shoreditch
+          drush en civicrmtheme -y
+          drush en bootstrap -y
+          drush vset theme_default bootstrap
+
+      - name: Generate CSS files for Shoreditch
+        working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/org.civicrm.shoreditch
+        run: |
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install
+          nvm use
+          npm install
+          npx gulp sass
+          drush cc all && drush cc civicrm
+
+      - name: Installing Shoreditch Companion Theme
+        working-directory: site/web/sites/all/themes
+        run: |
+          git clone --depth 1 https://github.com/compucorp/shoreditch-companion-d7-theme.git
+          drush en -y shoreditch_companion_d7_theme
+          drush vset civicrmtheme_theme_admin shoreditch_companion_d7_theme
+          drush sql-query "UPDATE block SET status = 0 WHERE theme='shoreditch_companion_d7_theme' AND module='civicrm' AND delta IN ('1', '2', '3', '4', '5');" -y
+          drush sql-query "UPDATE block SET status = 0 WHERE theme='shoreditch_companion_d7_theme' AND module='search' AND delta='form';" -y
+          drush sql-query "UPDATE block SET status = 0 WHERE theme='shoreditch_companion_d7_theme' AND module='system' AND delta IN ('navigation', 'powered-by');" -y
+          drush cc all && drush cc civicrm
+
+      - name: Install E2E Test Suite
+        run: |
+          amp test
+          git clone https://github.com/compucorp/membershipextras-e2e-tests.git --branch master
+          cd membershipextras-e2e-tests
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use
+          npm install
+          npx playwright install-deps
+
+      - name: Run E2E tests
+        working-directory: membershipextras-e2e-tests
+        run: |
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use
+          npx playwright test
