@@ -1,0 +1,32 @@
+{
+    "input" : {
+        "membership_type_org" : "3",
+        "membership_type" : "1",
+        "join_date" : "01/01/2022",
+        "start_date" : "01/01/2022"
+    },
+    "expected" : {
+        "first_instalment_date" : "1st January 2022",
+        "second_instalment_date" : "1st February 2022",
+        "third_instalment_date" : "1st March 2022",
+        "fourth_instalment_date" : "1st April 2022",
+        "fifth_instalment_date" : "1st May 2022",
+        "sixth_instalment_date" : "1st June 2022",
+        "seventh_instalment_date" : "1st July 2022",
+        "eighth_instalment_date" : "1st August 2022",
+        "ninth_instalment_date" : "1st September 2022",
+        "tenth_instalment_date" : "1st October 2022",
+        "eleventh_instalment_date" : "1st November 2022",
+        "twelveth_instalment_date" : "1st December 2022",
+        "single_instalment_amount" : "12.00",
+        "single_instalment_tax_amount" : "2.00",
+        "sub_total" : "120.00",
+        "total_sales_tax" : "24.00",
+        "total" : "144.00",
+        "membership_join_date" : "1st January 2022",
+        "membership_start_date" : "1st January 2022",
+        "membership_end_date" : "31st December 2022",
+        "membership_status" : "Current",
+        "auto_renew" : true
+    }
+}
