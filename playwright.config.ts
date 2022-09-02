@@ -32,7 +32,7 @@ export let projectName = 'compuclient';
  * Get the server url that we are running the tests on.
  */
  function getServerUrl(): string {
-  return process.env.E2E_SERVER_URL || 'https://compuclient-demo-4af.cc-test.site';
+  return process.env.E2E_SERVER_URL || 'https://compuclient-demo-i49.cc-test.site';
 }
 
 /**

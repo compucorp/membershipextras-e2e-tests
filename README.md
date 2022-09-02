@@ -1,3 +1,5 @@
+npm i https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz playwright
+
 # Membership Extras Product Suite E2E tests
 
 This contrains End-to-End (E2E) tests for memberships test suite, which are written with [Playwright](https://playwright.dev/).
