@@ -7,6 +7,7 @@
   "scripts": {},
   "dependencies": {
     "dayjs": "^1.11.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz",
+    "xlsx-calc": "^0.7.7"
   }
 }

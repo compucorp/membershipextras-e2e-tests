@@ -19,6 +19,7 @@ export class LoginPage extends BasePage {
   async logInAsAdmin(): Promise<void> {
     await this.page.goto(this.getAbsolutePageUrl());
     await this.page.fill(this.selectors.userNameField, this.credentials.admin.user);
+    await this.page.locator('.form-submit').click();
     await this.page.fill(this.selectors.passwordField, this.credentials.admin.password);
     await this.page.locator(this.selectors.passwordField).press('Enter');
   }

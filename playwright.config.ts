@@ -14,7 +14,7 @@ const config: PlaywrightTestConfig  = {
   testDir: './tests',
   outputDir: './report',
   reporter: 'list',
-  timeout: 40000,
+  timeout: 80000,
   use: {
     baseURL,
     browserName: 'chromium',
@@ -22,22 +22,28 @@ const config: PlaywrightTestConfig  = {
     viewport: { width: 1280, height: 720 },
     trace: 'retain-on-failure',
   },
+  projects: [
+    {
+      name: 'Core_scenario',
+    },
+    {
+      name: 'HCSA',
+    },
+  ],
 };
 
 export default config;
-
-export let projectName = 'compuclient';
 
 /**
  * Get the server url that we are running the tests on.
  */
  function getServerUrl(): string {
-  return process.env.E2E_SERVER_URL || 'https://compuclient-demo-i49.cc-test.site';
+  return process.env.E2E_SERVER_URL || 'http://compuclient142sspv1.localhost';
 }
 
 /**
  * Get the port number.
  */
  function getPort(): string {
-  return process.env.E2E_SERVER_PORT || '80';
+  return process.env.E2E_SERVER_PORT || '3951';
 }

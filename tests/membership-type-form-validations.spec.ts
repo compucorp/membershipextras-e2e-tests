@@ -1,12 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
 import { MembershipType } from '../pages/membership-type.page';
+import { XlsxTestDataHelper } from '../helper/xlsx';
 
 test.describe('Monthly payment plan membership ', async () => {
   let loginPage: LoginPage;
   let membershipTypeForm: MembershipType;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    var isValidProject = XlsxTestDataHelper.isValidProject(testInfo.project.name, testInfo.title);
+    if (!isValidProject) {
+      test.skip(true, 'This test is not valid for this project');
+    }
+
     loginPage = new LoginPage(page);
     await loginPage.logInAsAdmin();
 
